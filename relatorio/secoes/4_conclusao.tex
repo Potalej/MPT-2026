@@ -1,11 +1,11 @@
 \section{Conclusão}
 
-[COMENTAR SOBRE OS RESULTADOS DO TRABALHO]
+A aplicação do Parareal para trajetórias periódicas no geral não trouxe vantagens sobre o uso do propagador fino sequencialmente. Pelo contrário, dada a sensibilidade das órbitas periódicas conforme o número de corpos cresce, é necessário garantir a maior precisão possível, o que com o Parareal exige muitas iterações e tempo.
 
-[REFORÇAR A VALIDADE ESTATÍSTICA DO PROBLEMA E CONCLUIR ALGO SOBRE, DEPENDENDO DO RESULTADO QUE TIVER]
+Para órbitas não periódicas mas suaves, o Parareal até ofereceu alguns casos pontuais de maior velocidade que o método fino sequencial, mantendo a validade estatística das soluções. No entanto, os intervalos de integração considerados foram relativamente pequenos ($[0,10]$), então seriam necessários testes de longa duração para afirmar a viabilidade do método. Por outro lado, a não simpleticidade do método Parareal sugere que o erro na energia total deve se acumular com o tempo, tornando-o necessariamente inferior a um método sequencial simplético para simulações de longa duração. Caberia verificar se a mencionada ``versão simplética'' do método resolve essa questão.
 
-[COMENTAR SOBRE A NÃO SIMPLETICIDADE DO MÉTODO PARAREAL E SOBRE A VERSÃO SIMPLÉTICA DELE]
+Simulações de curta duração, no geral, têm interesse em órbitas individuais, e portanto manter a validade estatística não é o forte da aproximação numérica. Caberia analisar a partir de que ponto utilizar o método paralelo oferece soluções mais rápidas mas suficientemente precisas para sistemas pequenos.
 
-[COMENTAR QUAIS TESTES MAIS PODERIAM SER FEITOS]
+Já para órbitas não periódicas e com choques elásticos, o método se mostrou não aplicável. Aproximações suficientemente intensas entre os corpos podem impedir que o erro diminua devido a descontinuidade das trajetórias.
 
-[OUTRA POSSIBILIDADE PARA PROPAGADORES GROSSEIROS: USAR BARNES-HUT, FMM E APROXIMAÇÕES DE FORÇA, PORQUE SÃO A PARTE MAIS CUSTOSA DOS MÉTODOS]
+Por fim, uma possibilidade a ser levada em conta seria utilizar aproximações baratas para o cálculo das forças em vez de para os métodos de integração, uma vez que o custo principal vem desse cálculo. Utilizar aproximações como Barnes-Hut, \textit{Fast Multipole Method}, \textit{Particle Mesh}, entre outras, dentro do propagador grosseiro, e utilizar no fino o cálculo direto do potencial, usando o mesmo integrador em ambos os propagadores, poderia reduzir a necessidade de cálculos de $\vet F(\vet q)$ diretamente, e consequentemente diminuir o tempo computacional para obter a solução numérica.

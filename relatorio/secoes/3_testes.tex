@@ -3,7 +3,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Problemas-modelo e valores iniciais}
 
-Para fazer os testes, considerei alguns problemas-modelo que são coreografias (trajetórias periódicas), que permitem estudar a estabilidade numérica de métodos de integração. As trajetórias dos problema-modelo periódicos estão disponibilizadas abaixo, e os valores iniciais podem ser encontrados no repositório [ADICIONAR].
+Para fazer os testes, considerei alguns problemas-modelo que são coreografias (trajetórias periódicas), que permitem estudar a estabilidade numérica de métodos de integração. As trajetórias dos problema-modelo periódicos estão disponibilizadas abaixo, e os valores iniciais podem ser encontrados no repositório \href{https://github.com/Potalej/MPT-2026/}{https://github.com/Potalej/MPT-2026/}.
 
 \begin{probmodelo}[Lemniscata \cite{Chenciner2000}]\label{pm:lemniscata}
     Problema de 3 corpos com massas unitárias que formam um ``8'' deitado.
@@ -20,14 +20,14 @@ Para fazer os testes, considerei alguns problemas-modelo que são coreografias (
 %     \end{figure}
 % \end{probmodelo}
 
-\begin{probmodelo}[Coreografia-Doicu 5 corpos \cite{Doicu2022}]
+\begin{probmodelo}[Coreografia-Doicu 5 corpos \cite{Doicu2022}]\label{pm:doicu5}
     Configuração central de 5 corpos com massas unitárias.
     \begin{figure}[H]
         \includegraphics[width=0.35\linewidth]{img/vi/ccnmas5_1.png}
     \end{figure}
 \end{probmodelo}
 
-\begin{probmodelo}[Coreografia-Doicu 12 corpos \cite{Doicu2022}]
+\begin{probmodelo}[Coreografia-Doicu 12 corpos \cite{Doicu2022}]\label{pm:doicu12}
     Configuração central de 12 corpos com massas $m_a=1/10$, para todo $a = 1, ..., 12$.
     \begin{figure}[h!]
         \includegraphics[width=0.35\linewidth]{img/vi/ccnmas12_1.png}
@@ -38,7 +38,6 @@ Além disso, para os testes com sorteio de valores iniciais foi utilizada a bibl
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Resultados esperados}
-No PNCG, a parte mais custosa computacionalmente no geral é o cálculo das forças, pois são necessários no mínimo $q = N (N-1) / 2$ cálculos de $\vet F_{a,b}$. Um método de passo único com $R$ estágios faz $Rq$ cálculos, então se estamos aplicando o Parareal com $P$ processadores temos:
 
 Considere
 \begin{itemize}
@@ -60,16 +59,21 @@ O principal custo da aplicação de um integrador no problema de N-corpos é o c
 \begin{equation}
 \dfrac{\tau_C}{\tau_{\mathcal F}} \approx \dfrac{R_C q_N}{R_{\mathcal F} q_N} = \dfrac{R_C}{R_{\mathcal F}}.
 \end{equation}
-Além disso, consideramos $\delta t = \alpha_t \Delta t$, então
+Além disso, consideramos $\delta t = \alpha \Delta t$, então
 \begin{equation}
-    S(k) \approx \dfrac{1}{(1 + k) \alpha_t \dfrac{R_C}{R_{\mathcal F}} + \dfrac{k}{N_P}}.
+    S(k) \approx \dfrac{1}{(1 + k) \alpha \dfrac{R_C}{R_{\mathcal F}} + \dfrac{k}{N_P}}.
 \end{equation}
 
-...
+Nos experimentos feitos na seção de testes, tomaremos $R_C=1$ e $R_C=2$, e $R_{\mathcal F}=2$ e $R_{\mathcal F}=4$. Além disso, $\alpha=4/32$ ou $\alpha=1/32$. Conforme a figura \ref{fig:funcao_S}, isso nos deixa entre 7 e 13 iterações para haver vantagem em termos de tempo no Parareal.
 
-COISA INTERESSANTE: USAR UM RUNGE-KUTTA 4 COMO FINO E UM RUTH 4 COMO GROSSEIRO MANTÉM ERRO NA MESMA ORDEM, MAS A ENERGIA FICA MELHOR DO QUE O CONTRARIO!
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=.5\linewidth]{img/funcao_S.png}
+    \caption{Função $S(k)$ aproximada para $N_P=15$.}
+    \label{fig:funcao_S}
+\end{figure}
 
-OUTRA COISA INTERESSANTE: USANDO RK4 COMO FINO, O VERLET FICA COM ENERGIA MELHOR QUE O RK2 COMO GROSSEIRO
+Sobre a convergência, é preciso escolher intervalos suficientemente pequenos para que movimentos oscilatórios não sejam ``visíveis'' ao método, no sentido de fazer crescer sua instabilidade; noutro caso, o método não deve convergir, ao menos não em uma quantidade relativamente pequena de iterações (até 30). Além disso, descontinuidades podem afetar a comunicação entre os propagadores fino e grosseiro, então também se pode esperar que o Parareal não funcione tão bem quando se adiciona choques elásticos ao problema.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Órbitas periódicas}
@@ -298,7 +302,7 @@ Ainda assim, em nenhum caso utilizar o método Parareal foi mais vantajoso que u
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Problema com 5 corpos}
 
-O problema de 5 corpos já não converge tão rapidamente quanto à lemniscata. Por isso, também serão utilizados métodos de segunda ordem como métodos grosseiros.
+O problema de 5 corpos (p.m. \ref{pm:doicu5}) já não converge tão rapidamente quanto à lemniscata. Por isso, também serão utilizados métodos de segunda ordem como métodos grosseiros.
 
 \begin{figure}[H]
     \centering
@@ -352,7 +356,7 @@ Sobre a diferença de tempo entre o Parareal e a aplicação sequencial, observa
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Problema com 12 corpos}
 
-Este problema tem um período de aproximadamente $3.5$ unidades de tempo. Com a subdivisão de intervalos anterior, os métodos de quarta ordem não são capazes de sustentar as trajetórias por mais do que 2 períodos. Apesar de o Parareal convergir para as trajetórias do método fino - ainda que estejam erradas -, nesse caso os corpos se entrelaçam e espiralam rapidamente. Nos subintervalos definidos, esse comportamento espiral é oscilatório, então a não convergência do Parareal é esperada.
+Este problema (p.m. \ref{pm:doicu12}) tem um período de aproximadamente $3.5$ unidades de tempo. Com a subdivisão de intervalos anterior, os métodos de quarta ordem não são capazes de sustentar as trajetórias por mais do que 2 períodos. Apesar de o Parareal convergir para as trajetórias do método fino - ainda que estejam erradas -, nesse caso os corpos se entrelaçam e espiralam rapidamente. Nos subintervalos definidos, esse comportamento espiral é oscilatório, então a não convergência do Parareal é esperada.
 
 \begin{figure}[H]
     \centering
@@ -430,7 +434,7 @@ Em termos de tempo, dessa vez houve um equilíbrio maior. No entanto, ainda sem 
 
 % [SORTEAR VALORES INICIAIS COM DIFERENTES PARÂMETROS, OBSERVAR O COMPORTAMENTO GERAL E O TEMPO DE COMPUTAÇÃO. OBSERVAR INTEGRAIS PRIMEIRAS. COMENTAR SOBRE A VALIDADE ESTATÍSTICA DAS SIMULAÇÕES DE N-CORPOS E VERIFICAR SE O PARAREAL MANTÉM ESSA VALIDADE ESTATÍSTICA.]
 
-Ao tratar de órbitas gerais, existem questões sobre a validade das soluções, independente do método escolhido que foram levantadas desde o início das simulações numéricas de N-corpos \cite{Miller1964,Boekholt2015}. No entanto, há validade estatística nas simulações, apesar da divergência para trajetórias individuais \cite{shadoworbits}. Isso sugere que ainda que o método Parareal não convirja para a trajetória esperada, pode ser considerado utilizável caso mantenha a validade estatística da solução.
+Ao tratar de órbitas gerais, existem questões sobre a validade das soluções, independente do método escolhido que foram levantadas desde o início das simulações numéricas de N-corpos \cite{Miller1964,Boekholt2015}. No entanto, há validade estatística nas simulações, apesar da divergência para trajetórias individuais \cite{shadoworbits}. Isso sugere que ainda que o método Parareal não convirja para a trajetória esperada, pode ser considerado utilizável caso mantenha a validade estatística da solução. Aqui, a validade estatística é considerada a conservação das integrais primeiras e um erro equivalente ao do método fino no Parareal (não necessariamente erro de máquina).
 
 Para testar isso, vou utilizar a biblioteca \texttt{ncorpos-vi-py} \cite{ncorpos_vi_py} para gerar valores iniciais sob condições de equilíbrio (virial) inicial, isto é,
 \begin{equation}
@@ -439,8 +443,6 @@ Para testar isso, vou utilizar a biblioteca \texttt{ncorpos-vi-py} \cite{ncorpos
 e com integrais primeiras nulas, a menos da energia que será $E=-0.25$. Essas condições são uma padronização escolhida entre os simuladores de N-corpos na década de 1980 para possibilitar a comparação entre as diferentes implementações da época \cites{Heggie}[pp.110-112]{aarseth_gravitational_2003}. Foram gerados valores iniciais sob tais condições para 10, 50 e 200 corpos.
 
 Além disso, como não há garantia de que não haverão colisões ou aproximações intensas, o potencial será amortecido com $\varepsilon = 0.05$. Testes com choques elásticos (junto do amortecimento do potencial) também serão feitos, visando avaliar o comportamento do Parareal sob descontinuidades. 
-
-Os valores iniciais podem ser encontrados em [ADICIONAR REPOSITÓRIO].
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
