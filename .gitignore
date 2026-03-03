@@ -1,0 +1,5 @@
+outros/
+*__pycache__
+saida/
+build/
+*.so

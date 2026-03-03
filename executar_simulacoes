@@ -1,0 +1,7 @@
+#!/bin/bash
+
+n=$1
+
+mpiexec -np $n python rodar_parareal.py
+mpiexec -np 1 python rodar_referencia.py
+python3 pos.py $n
