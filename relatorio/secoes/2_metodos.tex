@@ -1,0 +1,132 @@
+\section{Métodos}
+
+Para fazer os testes, foram utilizados duas classes de métodos de passo único: os Runge-Kutta explícitos e os simpléticos.
+
+\subsection{Métodos de Runge-Kutta explícitos}
+
+A primeira classe consiste em métodos que levam em consideração somente a equação diferencial, sem suas propriedades geométricas, e se baseiam em médias ponderadas da derivada em diferentes pontos para estimar o passo seguinte. Os métodos de Runge-Kutta possuem a seguinte estrutura:
+\begin{align*}
+  \vet y_{k+1} = \vet y_k + h \vet \Phi_h(\vet y_k), \\
+  \vet \Phi_h(\vet y) = \sum_{r=1}^R b_r \vet \kappa_r (\vet y), \\
+  \vet \kappa_r(\vet y) = f\left(\vet y + h \sum_{j=1}^R a_{r,j} \vet \kappa_j (\vet y)\right)
+\end{align*}
+
+Os coeficientes $a_{i,j}$, $b_i$ e $c_i$ podem ser representados matricialmente pela Tabela de Butcher:
+\begin{table}[H]
+  \centering
+  \begin{tabular}{c|c}
+        $\vet c$ & $\bm A$\\
+        \hline
+                & $\vet b$
+  \end{tabular}
+  \caption{Tabela de Butcher.}
+\end{table}
+Os métodos explícitos têm como $\bm A$ uma matriz triangular inferior com diagonal nula, e os métodos implementados foram:
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{c|c}
+        0 & 0 \\
+        \hline
+          & 1
+  \end{tabular}
+  \caption{Euler explícito}
+  \quad
+  \begin{tabular}{c|cc}
+        0 & 0 \\
+        1/2 & 1/2 & 0 \\
+        \hline
+          & 0 & 1
+  \end{tabular}
+  \caption{Runge-Kutta de ordem 2 e 2 estágios (RK2)}
+  \quad
+  \begin{tabular}{c|ccccc}
+      $0$      &       &       &       &\\
+      $1/2$    & $1/2$ &       &       &\\
+      $1/2$    & $0$   & $1/2$ &       &\\
+      $1$      & $0$   & $0$   & $1$   & \\
+      \hline
+              & $1/6$ & $1/3$ & $1/3$ & $1/6$
+  \end{tabular}
+  \caption{Runge-Kutta de ordem 4 e 4 estágios (RK4)}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Métodos Simpléticos}
+
+Sejam $\vet z = (\vet q, \vet p)$ e $\vet w = (\vet u, \vet v)$ vetores no espaço de fases e considere uma aplicação $\Psi: \vet z \mapsto \vet u$ diferenciável e injetora. Para $\vet z$ temos a equação hamiltoniana $\dvet z = \bm \Omega \nabla_{\vet z} H(\vet z)$, e para $\vet w$ temos:
+\begin{equation}\label{eq:equacao_w}
+  \dvet w = \der{}{t} (\psi(\vet z)) = \vet D \psi(\vet z) \bm \Omega \nabla_{\vet z} H(\vet z).
+\end{equation}
+
+Agora, suponha que vale a seguinte equação:
+\begin{equation}\label{eq:criterio_simpletico}
+  D \vet \psi(\vet z) \bm \Omega (D \vet \psi(\vet z))^T = \bm \Omega.
+\end{equation}
+Nesse caso, como $\psi$ é inversível, podemos multiplicar ambos os lados por $(D \vet \psi(\vet z))^{-T}$ pela direita e teremos que:
+\begin{equation}
+  D \vet \psi(\vet z) \bm \Omega = \bm \Omega (D \vet \psi(\vet z))^{-T}.
+\end{equation}
+
+Substituindo na equação (\ref{eq:equacao_w}):
+\begin{equation}
+  \dvet w = \bm \Omega (D \vet \psi(\vet z))^{-T} \nabla_{\vet z} H(\vet z).
+\end{equation}
+
+Agora seja $\tilde H(\vet w) = H(\psi^{-1}(\vet w))$. Temos que:
+\begin{equation}
+  \nabla_{\vet w} \tilde H(\vet w) = (D \vet \psi(\psi^{-1}(\vet \omega)))^{-T} \nabla_{\vet z} H(\psi^{-1}(\vet w)).
+\end{equation}
+
+Assim, temos para $\vet w$ uma equação hamiltoniana, com função hamiltoniana $\tilde H$:
+\begin{equation}
+  \dvet w = \bm \Omega \nabla_{\vet w} \tilde H(\vet w).
+\end{equation}
+
+Isso é possibilitado pela equação (\ref{eq:criterio_simpletico}), que caracteriza $\psi$ como um \textit{simplectomorfismo}. No contexto de métodos numéricos, existem integradores de passo único que, para cada $h$ fixado, satisfazem o critério de simpleticidade (discretamente), e portanto existe uma equação modificada para a qual o método será o fluxo exato. Do ponto de vista prático, isso significa que métodos que satisfazem esse critério conservam a energia total em média.
+
+Para facilitar a notação e sem perder a generalidade, podemos considerar métodos simpléticos para $(q,p) \in \R^2$. Nesse caso, o critério de simpleticidade se resume a $\det{D \psi(q, p)} = 1$.
+
+\begin{example}[Método de Euler Simplético]
+Considere o \textit{método de Euler simplético} para hamiltonianas na forma $H = T + V$:
+\begin{equation}
+  p_{k+1} = p_k - h V_{q} (q_k), 
+  \quad
+  q_{k+1} = q_k + h T_{p} (p_{k+1}). 
+\end{equation}
+Temos que:
+\begin{equation*}
+  \derpar{p_{k+1}}{q_k} = - h V_{qq} (q_k),
+  \quad
+  \derpar{p_{k+1}}{p_k} = 1,
+\end{equation*}
+\begin{equation*}
+  \derpar{q_{k+1}}{q_k} = 1 - h^2 T_{pp} (p_{k+1}) V_{qq} (q_k),
+  \quad
+  \derpar{q_{k+1}}{p_k} = h T_{pp} (p_{k+1}).
+\end{equation*}
+
+O critério fica:
+\begin{align}
+  \det{D \psi(q_k, p_k)} &= \derpar{q_{k+1}}{q_k} \derpar{p_{k+1}}{p_k} - \derpar{q_{k+1}}{p_k} \derpar{p_{k+1}}{q_k} \nonumber \\
+  &= 1 - h^2 T_{pp} (p_{k+1}) V_{qq} (q_k) - h T_{pp} (p_{k+1}) \cdot (- h V_{qq} (q_k)) \nonumber \\
+  &= 1.
+\end{align}
+Assim, o método é, de fato, simplético.
+\end{example}
+
+Além do método de Euler simplético, outros dois métodos simpléticos foram implementados. O primeiro é o \textit{Velocity-Verlet} (ou \textit{leapfrog}), dado por
+\begin{align*}
+  \vet p_a^{k + 1/2} &= \vet p_a^{k} + \dfrac{h}{2} F(\vet q^{k}), \\
+  \vet q_a^{k + 1} &= \vet q_a^k + h \vet p_a^{k + 1/2} / m_a, \\
+  \vet p_a^{k + 1} &= \vet p_a^{k + 1/2} + \dfrac{h}{2} F(\vet q^{k+1}),
+\end{align*}
+que tem ordem 2.
+
+O outro é o método Ruth4 (de ordem 4), que consiste em uma composição de métodos de Euler simpléticos com diferentes tamanhos de passo. O método pode ser consultado em \cite[pp.57-59]{tcc}.
+
+\subsection{Observações}
+
+As constantes de movimento $\vet P$ e $\vet G$ são lineares, o que garante sua conservação em métodos de passo único (Runge-Kuttas), e portanto não serão analisados. O momento angular total $\vet J$, por outro lado, é quadrático, e apenas algumas classes de métodos garantem sua conservação; não é o caso dos Runge-Kutta explícitos, mas é o caso dos métodos simpléticos. A energia total, por outro lado, não é conservada exatamente por nenhum dos métodos que serão utilizados, mas é conservada em média pelos métodos simpléticos, enquanto apresenta comportamento $\sim \sqrt{t}$ para os métodos não-simpléticos \cite{hairer, Brouwer1937}.
+
+Vale ressaltar também que mesmo utilizando integradores simpléticos como propagadores fino e grosseiro no Parareal, o método não se torna simplético, uma vez que a soma de simplectomorfismos não necessariamente é um simplectomorfismo. Há uma ``versão simplética'' do Parareal \cite{bal2008symplectic}, mas neste trabalho será usada somente a versão original do método.

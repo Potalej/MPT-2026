@@ -1,0 +1,65 @@
+\section{O Problema de N-corpos gravitacional}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Problema}
+O Problema de N-corpos gravitacional (PNCG) descreve a dinâmica de $N$ corpos interagindo gravitacionalmente. Cada corpo é uma massa pontual $m_a > 0$ com posições $\vet q_a \in \R^d$ e velocidade $\vet v_a \in \R^d$, e sua dinâmica é descrita pelas equações de movimento:
+\begin{equation}
+  \begin{cases}
+    \dvet q_a = \vet v_a, \\
+    \dvet v_a = \sum_{b = 1, b \neq a}^{N} G m_b \dfrac{\vet q_b - \vet q_a}{\norma{\vet q_b - \vet q_a}^3} = \sum_{b=1, b \neq a}^{N} G m_b \dfrac{\vet r_{ab}}{r_{ab}^3}.
+  \end{cases}
+  a = 1, 2, ..., N.
+\end{equation}
+
+Por questão de notação e facilidade para manipulação de trabalhos anteriores, em vez de velocidades $\vet v_a$ aqui serão utilizados os momentos lineares $\vet p_a = m_a \vet v_a$. Com isso, temos as equações:
+\begin{equation}\label{eq:sistema_ncorpos_ham}
+  \begin{cases}
+    \dvet q_a = \vet p_a / m_a, \\
+    \dvet p_a = \sum_{b=1, b \neq a}^{N} G m_a m_b \dfrac{\vet r_{ab}}{r_{ab}^3}.
+  \end{cases}
+  a = 1, 2, ..., N.
+\end{equation}
+
+Sejam também $T$ e $V$ as energias cinética e potencial, respectivamente, dadas por
+\begin{equation}
+  T(\vet p) = \sum_{a=1}^N \dfrac{\norma{\vet p_a}^2}{2 m_a},
+  \quad
+  V(\vet q) = - G \sum_{b < a} \dfrac{m_a m_b}{r_{ab}},
+\end{equation}
+e $H(\vet q, \vet p) = T(\vet p) + V(\vet q)$ a função hamiltoniana para o sistema, que corresponde à energia total e é conservada pelas trajetórias.
+
+Através da função hamiltoniana, é possível escrever o sistema (\ref{eq:sistema_ncorpos_ham}) da seguinte forma:
+\begin{equation}
+\der{}{t} \begin{bmatrix} \vet q_a \\ \vet p_a \end{bmatrix} = \bm \Omega \nabla_{\vet q_a, \vet p_a} H(\vet q, \vet p),
+\quad
+\bm \Omega = \begin{bmatrix}\bm 0 & \bm I \\ -\bm I & \bm 0\end{bmatrix}.
+\end{equation}
+A matriz $\bm \Omega$ é chamada \textit{matriz simplética}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Quantidades conservadas}
+
+Além da energia total, o problema de N-corpos conserva mais três observáveis: o \textit{momento linear total} $\vet P$ dado por
+\begin{equation}
+\vet P = \sum_{a=1}^N \vet p_a,
+\end{equation}
+a \textit{referẽncia $\vet G$ do centro de massas}, dada por
+\begin{equation}
+G(t) = M \vet q_{cm} - t \vet P,
+\quad
+\vet q_{cm} = \dfrac{1}{M} \sum_{a=1}^N m_a \vet q_a,
+\
+M = \sum_{a=1}^N m_a,
+\end{equation}
+e o \textit{momento angular total} $\vet J$, dado por
+\begin{equation}
+\vet J = \sum_{a=1}^N \vet q_a \times \vet p_a.
+\end{equation}
+
+Neste trabalho serão feitas apenas simulações em duas dimensões. Nesse caso, o momento angular total fica dado por um escalar, que é a terceira componente do momento angular total tridimensional com terceiro eixo nulo:
+\begin{equation}
+J = \sum_{a=1}^N q_{a,x} p_{a,y} - q_{a,y} p_{a,x} = \sum_{a=1}^N \vet q_a \bm \Omega \vet p_a.
+\end{equation}
+Nesse caso, temos 6 quantidades conservadas.
+
+Numericamente, olhar para as quantidades conservadas é uma forma de verificar a validade da resolução numérica, embora a conservação dessas quantidades não signifique que há convergência necessariamente.
